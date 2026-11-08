@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HeatOpt | Smart Home Heating Decisions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="simple">
+<header><div class="wrap nav">
+  <div class="brand"><div class="logo" aria-hidden="true">✦</div><span>Heat<span class="opt">Opt</span></span><small>HOME ENERGY INTELLIGENCE</small></div>
+  <div class="nav-meta">Residential heating decision-support software</div>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <div class="eyebrow">⚡ Smart heating decisions</div>
+  <h1>The right heat pump. The right backup. <em>For your home.</em></h1>
+  <p>Find the best balance of heating cost and carbon emissions, simulated hour by hour for your climate and your house.</p>
+  <div class="pipeline" aria-label="How the model works">
+    <div class="pipe"><i>1</i>8,760 h of local weather</div><span class="arrow">→</span>
+    <div class="pipe"><i>2</i>Calibrated building heat loss</div><span class="arrow">→</span>
+    <div class="pipe"><i>3</i>Heat pump COP &amp; capacity curves</div><span class="arrow">→</span>
+    <div class="pipe"><i>4</i>Backup dispatch rules</div><span class="arrow">→</span>
+    <div class="pipe"><i>5</i>Cost + CO₂ optimization</div>
+  </div>
+</div></section>
+
+<main class="wrap">
+<div class="workspace">
+
+  <!-- ===== Form ===== -->
+  <section class="card form-card" aria-labelledby="formTitle">
+    <h2 id="formTitle">Tell us about your home</h2>
+    <p class="sub">Single-family home · Results update as you type.</p>
+    <form id="form" novalidate>
+      <div class="field"><span class="label">Home location</span>
+        <div class="cities" id="cities"></div>
+      </div>
+      <div class="field"><label class="label" for="area">Heated home size (sq. ft.)</label>
+        <input id="area" type="number" min="300" max="15000" step="1" value="2000" inputmode="numeric" required></div>
+      <div class="two">
+        <div class="field"><label class="label" for="year">Year built</label>
+          <input id="year" type="number" min="1800" max="2026" value="1990" inputmode="numeric" required></div>
+        <div class="field"><label class="label" for="people">People living here</label>
+          <input id="people" type="number" min="1" max="20" value="4" inputmode="numeric" required></div>
+      </div>
+      <div class="field"><label class="label" for="indoor">How warm do you keep your home?</label>
+        <select id="indoor"><option value="18">64°F / 18°C</option><option value="20">68°F / 20°C</option><option value="21" selected>70°F / 21°C</option><option value="22">72°F / 22°C</option><option value="24">75°F / 24°C</option></select></div>
+      <div class="field"><span class="label">Heating options to compare</span>
+        <div class="checks" id="checks">
+          <label class="chip" style="--c:var(--hp)"><input type="checkbox" value="hp" checked><span class="sw"></span>Heat pump</label>
+          <label class="chip" style="--c:#f2a50c"><input type="checkbox" value="electric_resistance" checked><span class="sw"></span>Electric resistance</label>
+          <label class="chip" style="--c:#eb6834"><input type="checkbox" value="natural_gas" checked><span class="sw"></span>Natural gas</label>
+          <label class="chip" style="--c:#7b5a45"><input type="checkbox" value="heating_oil"><span class="sw"></span>Heating oil</label>
+          <label class="chip" style="--c:#e2557a"><input type="checkbox" value="propane"><span class="sw"></span>Propane</label>
+          <label class="chip" style="--c:#4f8f2a"><input type="checkbox" value="wood"><span class="sw"></span>Wood stove</label>
+        </div>
+        <p class="hint">Keep the heat pump on and pick one or more backups to test hybrid systems.</p>
+      </div>
+      <button class="btn" type="submit">Calculate my heating options →</button>
+      <div class="error" id="error" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <!-- ===== Results ===== -->
+  <div class="results" id="results" aria-live="polite">
+    <section class="card res-head">
+      <div class="toprow">
+        <div><h2>Your heating recommendation</h2><p class="sub" id="viewSub">Three options for your home</p></div>
+        <div class="viewbar">
+          <span class="tag" id="tag">Example home</span>
+          <div class="seg" role="group" aria-label="View"><button type="button" data-view="simple" aria-pressed="true">Simple</button><button type="button" data-view="advanced" aria-pressed="false">Advanced</button></div>
+        </div>
+      </div>
+      <div class="preview" id="preview"></div>
+
+      <div class="recs simple-only" id="recs"></div>
+      <p class="simple-note simple-only" id="simpleNote"></p>
+
+      <div class="objectives adv-only" id="choices" role="tablist" aria-label="Optimization goal"></div>
+
+      <div class="banner adv-only" id="banner">
+        <div>
+          <small id="recommendLabel">Best balance of cost + CO₂</small>
+          <h3 id="winner">Calculating…</h3>
+          <p id="reason">—</p>
+        </div>
+        <div class="donut" aria-hidden="true"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="16" fill="none" stroke="#e6e9ef" stroke-width="6"/><circle id="donutArc" cx="21" cy="21" r="16" fill="none" stroke="var(--hp)" stroke-width="6" stroke-linecap="round" stroke-dasharray="0 101"/></svg><span id="donutPct">–</span><div class="dcap">from heat pump</div></div>
+      </div>
+
+      <div class="kpis adv-only">
+        <div class="kpi" style="--c:var(--blue)"><div class="ic">◎</div><div><span>Heat pump size</span><b class="tnum" id="size">—</b><em id="sizeNote">at winter design temperature</em></div></div>
+        <div class="kpi" style="--c:var(--teal)"><div class="ic">♺</div><div><span>Heat from heat pump</span><b class="tnum" id="share">—</b><em id="scop">seasonal COP —</em></div></div>
+        <div class="kpi" style="--c:var(--rose)"><div class="ic">▲</div><div><span>Peak heating need</span><b class="tnum" id="peak">—</b><em id="annualHeat">— kWh of heat a year</em></div></div>
+        <div class="kpi" style="--c:var(--amber)"><div class="ic">$</div><div><span>Annual energy cost</span><b class="tnum" id="operating">—</b><em id="opDelta">energy use only</em></div></div>
+        <div class="kpi" style="--c:var(--pick-co2)"><div class="ic">❋</div><div><span>Annual CO₂ emissions</span><b class="tnum" id="co2">—</b><em id="co2Delta">tonnes CO₂e per year</em></div></div>
+        <div class="kpi" style="--c:var(--violet)"><div class="ic">⌂</div><div><span>Upfront heat pump cost</span><b class="tnum" id="upfront">—</b><em>illustrative installed estimate</em></div></div>
+      </div>
+    </section>
+
+    <section class="card chart-card adv-only">
+      <h3>Every system the model tested</h3>
+      <p class="sub">Each dot is one combination of heat pump model, size, backup fuel and control rule. Lower-left is cheaper and cleaner.</p>
+      <div class="legend">
+        <span><i class="o" style="--c:var(--pick-cost)"></i>Lowest cost</span>
+        <span><i class="o" style="--c:var(--pick-bal)"></i>Optimal</span>
+        <span><i class="o" style="--c:var(--pick-co2)"></i>Lowest CO₂</span>
+        <span><i class="ring"></i>Other heat pump systems</span>
+        <span><i class="dm"></i>Backup only (no heat pump)</span>
+      </div>
+      <svg class="chart" id="scatter" viewBox="0 0 680 330" role="img" aria-label="Annualized cost versus annual CO2 for every tested system"></svg>
+      <details class="disc"><summary>Show as a table</summary><article><div class="tableview" id="scatterTable"></div></article></details>
+    </section>
+
+    <div class="charts2 adv-only">
+      <section class="card chart-card adv-only">
+        <h3>Where your heat comes from, month by month</h3>
+        <p class="sub" id="monthSub">Heat delivered to the home (kWh)</p>
+        <div class="legend"><span><i style="--c:var(--hp)"></i>Heat pump</span><span><i style="--c:var(--backup)"></i><span id="bkName">Backup</span></span></div>
+        <svg class="chart" id="monthly" viewBox="0 0 400 250" role="img" aria-label="Monthly heat from heat pump and backup"></svg>
+      </section>
+      <section class="card chart-card adv-only">
+        <h3>When the backup takes over</h3>
+        <p class="sub">Annual heat delivered at each outdoor temperature (kWh)</p>
+        <div class="legend"><span><i style="--c:var(--hp)"></i>Heat pump</span><span><i style="--c:var(--backup)"></i>Backup</span></div>
+        <svg class="chart" id="bins" viewBox="0 0 400 250" role="img" aria-label="Heat delivered by outdoor temperature"></svg>
+      </section>
+    </div>
+
+    <section class="card chart-card adv-only">
+      <h3>The same home in three climates</h3>
+      <p class="sub">Your house and choices, re-run in each city. The best-balance system shifts with climate and grid.</p>
+      <div class="citygrid" id="citygrid"></div>
+    </section>
+
+    <section class="card chart-card adv-only">
+      <h3>Cost and carbon comparison</h3>
+      <p class="sub">Annualized cost = energy + heat pump capital recovery over 15 years at 5%.</p>
+      <div id="comparison"></div>
+      <div style="margin-top:12px">
+        <details class="disc"><summary>Model assumptions and data sources</summary><article>
+          <p>Home heat loss comes from calibrated Boston, Atlanta and Montreal building archetypes and is adjusted for floor area, construction year, occupants and thermostat setting. The model uses 8,760 hours of city-specific typical-year weather and temperature-dependent equipment curves. This browser calculator approximates the project's full ISO 13790 5R1C model; it does not re-run that dynamic model for each entered home.</p>
+          <p>Annual cost includes purchased energy. The optimization compares annualized installed heat pump cost over 15 years at a 5% discount rate. The balanced selection adds $190 per tonne CO₂e to annualized cost as an explicit scenario assumption. Existing backup equipment is treated as already installed; new backup installation costs and rebates are not included. Equipment performance curves include interpolated or extrapolated temperatures, and sizing scales reference performance curves rather than guaranteeing that exact equipment size is sold.</p>
+          <p>Wood prices may rely on historical/proxy data. Fuel and grid factors follow the uploaded EIA / EPA / eGRID / Hydro-Québec data and the project files. No hourly marginal grid emissions or full lifecycle refrigerant impacts are included.</p>
+          <p id="priceNotes"></p>
+          <p id="missingNote" style="font-weight:700;color:#9a5b00"></p>
+        </article></details>
+      </div>
+      <p class="smallprint" style="margin:10px 0 0">Screening estimate, not installation advice. Actual heat pump sizing needs an on-site heating-load assessment.</p>
+    </section>
+  </div>
+</div>
+
+<div class="steps">
+  <div class="step" style="--c:var(--blue)"><strong>01 · Tell us about your home</strong><p>Enter the few details that drive space heating.</p></div>
+  <div class="step" style="--c:var(--violet)"><strong>02 · We simulate every hour of the year</strong><p>City weather, equipment curves, energy prices and grid emissions.</p></div>
+  <div class="step" style="--c:var(--teal)"><strong>03 · You choose the best fit</strong><p>Compare lowest cost, lowest carbon and a balanced design.</p></div>
+</div>
+<section class="team" aria-label="Team credits">
+  <div class="tn"><small>Built by</small><b>Team MegaSize</b><span>MIT Energy &amp; Climate Hack 2026 · Heat pump track</span>
+    <div class="flags"><svg class="flag" viewBox="0 0 30 20" role="img" aria-label="France flag"><rect width="10" height="20" fill="#002654"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ce1126"/></svg><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAAA8CAIAAABpZzoSAAAFVUlEQVR42u2ZW2wUZRTHf983s/ddum2thhaqCVCgaQIqYlqrERBURK0GHogEEiRGHuTBmAgPxqjEBBINmiiJxks0QkQMBkwQhdiAGJqScr9UQEqEFkMv0G33OvN9PnSwqaHUB3bptnOeNtmZ3cxvzvmf8z+fKJ+xmlsXhlRd8cCKmkNrF2y/mhCG1Nzq0Fp4Td12rWjhZy9ejZumofWt+xOJGy4OF4eLw8Xh4nBxuDhcHC4OF4eLw8UxtDFzcVwPIfCYLg7Q4DG4co2djfg8KD26cShF0E/DKdZuwrKRYkTjsBW2GkIXbMX2A5y8QMNpQn5sNTg7PfSvDWsc0TDRMB4TW92gEJQi5OfgH/x0EGDjj2iNuFFB9VEI+igeg8+bRSIye+po2bz/PVv30hkjGibo+++7VeA1+WgH8SSGZGcj+08SCQxIEFshoDCM1+REC+u3UH+EgC9bKpMtQbcUBSFsmyXrKLuDx+9n+RM8UEE8RcZCCiyb4jH80sS23xzJyFi8u5kdb2MaKI0ApSkI0ZPgi11s+pWG0xSE2L0Oy0bkV3ZIQW+SVxcyezqX2vl8F/NW89ondHTj82Ap/D7OtrL8PVKZ/iyoP8KbXxH0OUnk97KrkQVv8PKH7D1GKsOGlUwtJ5lGiPwqFlAapXhnGWE/HpN4ii9/5tOdtHXiNclYfFvPrGnUVjmZHwqwZA4tlzlwCp8HKag/wgc/0HAarwnwXC11NbR3Yxp5KKVS0JNkxmSWznUKJBKkroZIEKWxbF6az+a3WPzodd0NsWEl36xhYhmWTcriwSlUVyIlliIc4PVFThLla2cxBIkkr9RRUgDQ2sHXe7irkIyFx8Q0ScboTfb30a4Y8SRBL7Yi6KM7zsYdKIVSLJvLfZPoSWZ3NpHZnr6TaSaMZeljjjruaeLKVTwmSqM1hhzweIZECOergJe9R+nqQQgKQqx4kkQ663Na1qdSKYmnWDqPaBgNZ1s5dp6AF62GGlg1ew457m7RI1SWk0jlP46+BJk8jqdmOh1k9yE8JvqmRsZr0tbJvuMAXpPFs7LYXG+DZ1Ga52uREuD3E8STSDHocKkVfi/HznOpA2BGBfdOpDfp3J73OKQgnqSmkopxAM0XnV6rB88O06DpjMOr7iHC/hyZXZmbdYZlUzSG2dMA2rtpvngz6yEEtqLpLEDQx8NVWZy7bpvB15rqqc6H4y1IwWDpYRp0dHOuDWBSGRPGksrkyPvLnO27Uhmq7qEwAnD4nOP9bYUaaNgyNobkYjstlwGmTyASvJnrz1ccGYuxxZQWAXTGkJLCCP4woUC/xBSGKQwTDROLk0gDTCnHkORsSZajFaUAWxEOMHk8Jy7wdxeNzbR20NHNtv3ONZ0x1n9HxTgmlXH0T2f3UTkey85dSZu51A6PQUkBQnCmlXlrSKQGXBBPsX6LkyZ+L0JgGpREsRWIkYjDkI55T2eGGFLiKWdm/9fsjzQcfeHz4DUpLebOKJV3M7GUw+fYug+gMMKqOnoSnLlE8190xLAVpnnjjWHe4zAksQQvzOGZakqLGRPE6yEU5eMtDo6gj1XPUhihN0Fvis4YHd0UhcnYORo6coqjr7mML8GQZCxsxbVepKA30V9NnTGUwtaYBqXFlJeQzIzcYhGCdAYNAoTAkJjGACdiSAwDbaM06Qwpcn3yYub+/PH/PKAABMI9wb+9YQ6H82pDOoui0Y5DCNKWY0l6EujRjEPg9JraKkxJUSSn9mTY4ZCS3iTzZ/J0NQK0Jm2hVO6mjOGoHbbCsvtrZ7RL6XCg4DZaF4eLw8Xh4nBxuDhcHC4OF4eLY7jGP31sGEhbtDS5AAAAAElFTkSuQmCC" alt="Barbados flag" style="object-fit:cover"><svg class="flag" viewBox="0 0 30 20" role="img" aria-label="India flag"><rect width="30" height="6.67" fill="#ff9933"/><rect y="6.67" width="30" height="6.67" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#000080" stroke-width=".7"/><circle cx="15" cy="10" r=".6" fill="#000080"/></svg><svg class="flag" viewBox="0 0 30 20" role="img" aria-label="Azores flag"><rect width="30" height="20" fill="#fff"/><rect width="12" height="20" fill="#0055a4"/><path d="M2 1.4h3.6v2.9c0 1.3-.9 2-1.8 2.3-.9-.3-1.8-1-1.8-2.3z" fill="#fff" stroke="#d52b1e" stroke-width=".6"/><g fill="#003893"><circle cx="3.8" cy="2.9" r=".35"/><circle cx="3.1" cy="3.8" r=".35"/><circle cx="4.5" cy="3.8" r=".35"/><circle cx="3.8" cy="4.7" r=".35"/></g><g fill="#ffcc00"><polygon points="6.40,10.25 6.59,10.75 7.11,10.77 6.70,11.10 6.84,11.61 6.40,11.31 5.96,11.61 6.10,11.10 5.69,10.77 6.21,10.75"/><polygon points="6.83,8.11 7.01,8.60 7.54,8.63 7.13,8.95 7.27,9.46 6.83,9.17 6.39,9.46 6.53,8.95 6.11,8.63 6.64,8.60"/><polygon points="8.04,6.29 8.23,6.79 8.75,6.81 8.34,7.14 8.48,7.65 8.04,7.36 7.60,7.65 7.74,7.14 7.33,6.81 7.86,6.79"/><polygon points="9.86,5.08 10.04,5.57 10.57,5.59 10.16,5.92 10.30,6.43 9.86,6.14 9.42,6.43 9.56,5.92 9.14,5.59 9.67,5.57"/><polygon points="12.00,4.65 12.19,5.15 12.71,5.17 12.30,5.50 12.44,6.01 12.00,5.72 11.56,6.01 11.70,5.50 11.29,5.17 11.81,5.15"/><polygon points="14.14,5.08 14.33,5.57 14.86,5.59 14.44,5.92 14.58,6.43 14.14,6.14 13.70,6.43 13.84,5.92 13.43,5.59 13.96,5.57"/><polygon points="15.96,6.29 16.14,6.79 16.67,6.81 16.26,7.14 16.40,7.65 15.96,7.36 15.52,7.65 15.66,7.14 15.25,6.81 15.77,6.79"/><polygon points="17.17,8.11 17.36,8.60 17.89,8.63 17.47,8.95 17.61,9.46 17.17,9.17 16.73,9.46 16.87,8.95 16.46,8.63 16.99,8.60"/><polygon points="17.60,10.25 17.79,10.75 18.31,10.77 17.90,11.10 18.04,11.61 17.60,11.31 17.16,11.61 17.30,11.10 16.89,10.77 17.41,10.75"/><path d="M7.6 9.4 12 11.4 16.4 9.4 15.4 11.8 12 12.9 8.6 11.8z"/><ellipse cx="12" cy="12.6" rx="1" ry="1.9"/><circle cx="12" cy="10.7" r=".75"/><path d="M11.2 14.1h1.6L12 15.9z"/></g></svg></div></div>
+  <div class="members"><div class="member" style="--c:#3b5b9a"><div class="av">MB</div><div><b>Micaiah Bartlett</b><span><img class="flag" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAAA8CAIAAABpZzoSAAAFVUlEQVR42u2ZW2wUZRTHf983s/ddum2thhaqCVCgaQIqYlqrERBURK0GHogEEiRGHuTBmAgPxqjEBBINmiiJxks0QkQMBkwQhdiAGJqScr9UQEqEFkMv0G33OvN9PnSwqaHUB3bptnOeNtmZ3cxvzvmf8z+fKJ+xmlsXhlRd8cCKmkNrF2y/mhCG1Nzq0Fp4Td12rWjhZy9ejZumofWt+xOJGy4OF4eLw8Xh4nBxuDhcHC4OF4eLw8UxtDFzcVwPIfCYLg7Q4DG4co2djfg8KD26cShF0E/DKdZuwrKRYkTjsBW2GkIXbMX2A5y8QMNpQn5sNTg7PfSvDWsc0TDRMB4TW92gEJQi5OfgH/x0EGDjj2iNuFFB9VEI+igeg8+bRSIye+po2bz/PVv30hkjGibo+++7VeA1+WgH8SSGZGcj+08SCQxIEFshoDCM1+REC+u3UH+EgC9bKpMtQbcUBSFsmyXrKLuDx+9n+RM8UEE8RcZCCiyb4jH80sS23xzJyFi8u5kdb2MaKI0ApSkI0ZPgi11s+pWG0xSE2L0Oy0bkV3ZIQW+SVxcyezqX2vl8F/NW89ondHTj82Ap/D7OtrL8PVKZ/iyoP8KbXxH0OUnk97KrkQVv8PKH7D1GKsOGlUwtJ5lGiPwqFlAapXhnGWE/HpN4ii9/5tOdtHXiNclYfFvPrGnUVjmZHwqwZA4tlzlwCp8HKag/wgc/0HAarwnwXC11NbR3Yxp5KKVS0JNkxmSWznUKJBKkroZIEKWxbF6az+a3WPzodd0NsWEl36xhYhmWTcriwSlUVyIlliIc4PVFThLla2cxBIkkr9RRUgDQ2sHXe7irkIyFx8Q0ScboTfb30a4Y8SRBL7Yi6KM7zsYdKIVSLJvLfZPoSWZ3NpHZnr6TaSaMZeljjjruaeLKVTwmSqM1hhzweIZECOergJe9R+nqQQgKQqx4kkQ663Na1qdSKYmnWDqPaBgNZ1s5dp6AF62GGlg1ew457m7RI1SWk0jlP46+BJk8jqdmOh1k9yE8JvqmRsZr0tbJvuMAXpPFs7LYXG+DZ1Ga52uREuD3E8STSDHocKkVfi/HznOpA2BGBfdOpDfp3J73OKQgnqSmkopxAM0XnV6rB88O06DpjMOr7iHC/hyZXZmbdYZlUzSG2dMA2rtpvngz6yEEtqLpLEDQx8NVWZy7bpvB15rqqc6H4y1IwWDpYRp0dHOuDWBSGRPGksrkyPvLnO27Uhmq7qEwAnD4nOP9bYUaaNgyNobkYjstlwGmTyASvJnrz1ccGYuxxZQWAXTGkJLCCP4woUC/xBSGKQwTDROLk0gDTCnHkORsSZajFaUAWxEOMHk8Jy7wdxeNzbR20NHNtv3ONZ0x1n9HxTgmlXH0T2f3UTkey85dSZu51A6PQUkBQnCmlXlrSKQGXBBPsX6LkyZ+L0JgGpREsRWIkYjDkI55T2eGGFLiKWdm/9fsjzQcfeHz4DUpLebOKJV3M7GUw+fYug+gMMKqOnoSnLlE8190xLAVpnnjjWHe4zAksQQvzOGZakqLGRPE6yEU5eMtDo6gj1XPUhihN0Fvis4YHd0UhcnYORo6coqjr7mML8GQZCxsxbVepKA30V9NnTGUwtaYBqXFlJeQzIzcYhGCdAYNAoTAkJjGACdiSAwDbaM06Qwpcn3yYub+/PH/PKAABMI9wb+9YQ6H82pDOoui0Y5DCNKWY0l6EujRjEPg9JraKkxJUSSn9mTY4ZCS3iTzZ/J0NQK0Jm2hVO6mjOGoHbbCsvtrZ7RL6XCg4DZaF4eLw8Xh4nBxuDhcHC4OF4eLY7jGP31sGEhbtDS5AAAAAElFTkSuQmCC" alt="Barbados flag" style="object-fit:cover">Barbados</span></div></div><div class="member" style="--c:#2f7a86"><div class="av">OS</div><div><b>Owen Sogbadji</b><span><svg class="flag" viewBox="0 0 30 20" role="img" aria-label="France flag"><rect width="10" height="20" fill="#002654"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ce1126"/></svg>France</span></div></div><div class="member" style="--c:#a8741c"><div class="av">LJ</div><div><b>Liam Johnson</b><span><svg class="flag" viewBox="0 0 30 20" role="img" aria-label="Azores flag"><rect width="30" height="20" fill="#fff"/><rect width="12" height="20" fill="#0055a4"/><path d="M2 1.4h3.6v2.9c0 1.3-.9 2-1.8 2.3-.9-.3-1.8-1-1.8-2.3z" fill="#fff" stroke="#d52b1e" stroke-width=".6"/><g fill="#003893"><circle cx="3.8" cy="2.9" r=".35"/><circle cx="3.1" cy="3.8" r=".35"/><circle cx="4.5" cy="3.8" r=".35"/><circle cx="3.8" cy="4.7" r=".35"/></g><g fill="#ffcc00"><polygon points="6.40,10.25 6.59,10.75 7.11,10.77 6.70,11.10 6.84,11.61 6.40,11.31 5.96,11.61 6.10,11.10 5.69,10.77 6.21,10.75"/><polygon points="6.83,8.11 7.01,8.60 7.54,8.63 7.13,8.95 7.27,9.46 6.83,9.17 6.39,9.46 6.53,8.95 6.11,8.63 6.64,8.60"/><polygon points="8.04,6.29 8.23,6.79 8.75,6.81 8.34,7.14 8.48,7.65 8.04,7.36 7.60,7.65 7.74,7.14 7.33,6.81 7.86,6.79"/><polygon points="9.86,5.08 10.04,5.57 10.57,5.59 10.16,5.92 10.30,6.43 9.86,6.14 9.42,6.43 9.56,5.92 9.14,5.59 9.67,5.57"/><polygon points="12.00,4.65 12.19,5.15 12.71,5.17 12.30,5.50 12.44,6.01 12.00,5.72 11.56,6.01 11.70,5.50 11.29,5.17 11.81,5.15"/><polygon points="14.14,5.08 14.33,5.57 14.86,5.59 14.44,5.92 14.58,6.43 14.14,6.14 13.70,6.43 13.84,5.92 13.43,5.59 13.96,5.57"/><polygon points="15.96,6.29 16.14,6.79 16.67,6.81 16.26,7.14 16.40,7.65 15.96,7.36 15.52,7.65 15.66,7.14 15.25,6.81 15.77,6.79"/><polygon points="17.17,8.11 17.36,8.60 17.89,8.63 17.47,8.95 17.61,9.46 17.17,9.17 16.73,9.46 16.87,8.95 16.46,8.63 16.99,8.60"/><polygon points="17.60,10.25 17.79,10.75 18.31,10.77 17.90,11.10 18.04,11.61 17.60,11.31 17.16,11.61 17.30,11.10 16.89,10.77 17.41,10.75"/><path d="M7.6 9.4 12 11.4 16.4 9.4 15.4 11.8 12 12.9 8.6 11.8z"/><ellipse cx="12" cy="12.6" rx="1" ry="1.9"/><circle cx="12" cy="10.7" r=".75"/><path d="M11.2 14.1h1.6L12 15.9z"/></g></svg>Azores</span></div></div><div class="member" style="--c:#5a4fb8"><div class="av">AK</div><div><b>Alok Kumar</b><span><svg class="flag" viewBox="0 0 30 20" role="img" aria-label="India flag"><rect width="30" height="6.67" fill="#ff9933"/><rect y="6.67" width="30" height="6.67" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#000080" stroke-width=".7"/><circle cx="15" cy="10" r=".6" fill="#000080"/></svg>India</span></div></div></div>
+</section>
+</main>
+
+<footer><div class="wrap footer-row">
+  <span>© 2026 HeatOpt · Team MegaSize · MIT Energy &amp; Climate Hack prototype</span>
+  <span>Renovation sensitivity: for undocumented or non-code-compliant changes, costs may vary ±25% and CO₂e ±30%. Informational only; not applied to calculations.</span>
+</div></footer>
+<div id="tip" role="tooltip"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/model.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

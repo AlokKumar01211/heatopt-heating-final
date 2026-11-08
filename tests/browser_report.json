@@ -1,0 +1,17 @@
+{
+  "passed_checks": [
+    "Default page loads",
+    "Simple view active",
+    "Six heating options present",
+    "Three cities present",
+    "Team credit present",
+    "Numerical recommendation generated",
+    "Advanced CTA displays charts",
+    "Simple CTA restores summary",
+    "No JS exceptions in desktop run"
+  ],
+  "not_verified": [
+    "Mobile browser automated test timed out",
+    "Live hosted URL test not performed"
+  ]
+}

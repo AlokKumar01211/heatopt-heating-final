@@ -1,0 +1,97 @@
+[
+  {
+    "name": "baseline calculations finite",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "balanced objective minimum",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "cost objective minimum",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "carbon objective minimum",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "area changes heat",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "new home alters heat",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "warmer indoor temperature raises heat",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "occupants affect heating",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "Atlanta output",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "Montreal output",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "electric_resistance allowed and produces configurations",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "natural_gas allowed and produces configurations",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "heating_oil allowed and produces configurations",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "propane allowed and produces configurations",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "wood allowed and produces configurations",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "backup only",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "heat pump only prompts backup choice",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "temperature arrays hourly",
+    "pass": true,
+    "detail": ""
+  },
+  {
+    "name": "annual heat positive",
+    "pass": true,
+    "detail": ""
+  }
+]
