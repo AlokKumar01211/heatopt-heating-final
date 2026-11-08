@@ -45,6 +45,7 @@ header{background:#fff;border-bottom:1px solid var(--line)}
 .field{margin-top:16px}
 .label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-2);margin-bottom:7px}
 .field input,.field select{display:block;width:100%;background:#fff;border:1.5px solid #d7ddea;border-radius:10px;padding:10px 12px;min-height:44px;outline:none;transition:border-color .15s,box-shadow .15s}
+.field input::placeholder{color:#8f6a4c;opacity:1}
 .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 4px #3b5b9a1f}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .two .field{margin-top:16px}

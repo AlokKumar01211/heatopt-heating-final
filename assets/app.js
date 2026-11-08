@@ -186,7 +186,9 @@ setView('simple');
 
 /* ---------- inputs ---------- */
 function readInput(){
-  const area=Number($('area').value),year=Number($('year').value),people=Number($('people').value);
+  const defaults={area:2000,year:1990,people:4};
+  const value=id=>$(id).value===''&&isExample?defaults[id]:Number($(id).value);
+  const area=value('area'),year=value('year'),people=value('people');
   const bad=!Number.isFinite(area)||area<300||area>15000?'Home size must be between 300 and 15,000 sq. ft.':
     !Number.isFinite(year)||!Number.isInteger(year)||year<1800||year>2026?'Year built must be between 1800 and 2026.':
     !Number.isFinite(people)||!Number.isInteger(people)||people<1||people>20?'People living here must be between 1 and 20.':
